@@ -1,8 +1,14 @@
 const express = require('express')
 const router = express.Router()
 const User = require('../models/User')
-
+const jwtSecret = "myNameIsRohitarya"
 const { body, validationResult } = require('express-validator');
+
+//securing password
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+
+
 
 router.post("/creatuser" ,  [
 
@@ -16,12 +22,16 @@ body('password' , 'password is too short').isLength({ min: 5 })]
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
+      
+
+      const salt = await bcrypt.genSalt(10);
+      let secPassword = await bcrypt.hash(req.body.password , salt)
 
       try{
          await  User.create({
               
                name: req.body.name,
-               password:req.body.password ,
+               password: secPassword ,
                email : req.body.email ,
                location:req.body.location
           })
@@ -59,11 +69,23 @@ router.post("/loginuser" ,
                 return res.json({ errors: "Try logging with correct credentials" });
             }
 
-            if(req.body.password !== userData.password){
+            const pwdCompare = await bcrypt.compare(req.body.password,userData.password)
+
+            if(!pwdCompare){
                 return res.json({ errors: "Try logging with correct credentials" });
             }
 
-            return res.json({success:true});
+
+           const data ={
+              
+                 user:{
+                    id:userData.id
+                 }   
+           }
+
+
+           const authToken = jwt.sign(data , jwtSecret)
+            return res.json({success:true , authToken:authToken});
 
     
           }  catch(error){
