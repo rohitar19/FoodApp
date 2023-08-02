@@ -126,7 +126,7 @@ export default function Home() {
 
       <div className='container'>
         {
-            foodCat !=[] 
+            foodCat !==[] 
             ? foodCat.map((data) => {
                 return(
                   <div className="row mb-3">
@@ -141,10 +141,9 @@ export default function Home() {
                            return (
                               
                                <div key={filterItems._id} className="col-12 col-md-6 col-lg-3">
-                                <Card foodName ={filterItems.name}
+                                <Card foodItem ={filterItems}
                                     options = {filterItems.options[0]}
-                                    imgSrc={filterItems.img}
-                                
+                                    
                                 ></Card>
                              </div>
                            )   
